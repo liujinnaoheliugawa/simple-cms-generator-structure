@@ -41,7 +41,8 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
     @Parameter
     private String resorucePath;
 
-    private static List<String> sysFields = new ArrayList<>(Arrays.asList("adt", "aUserId", "cdt", "cUserId", "udt", "uUserId", "serialVersionUID", "status", "remarks"));
+    @Parameter
+    private List<String> sysFields;
 
     @Parameter
     private List<String> selectList;
@@ -308,7 +309,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
         generateFile(controllerSrcFolder + pojoClass.getSimpleName() + "Controller.java", src);
     }
 
-    private static void generateHtmlFiles(Class pojoClass, String templateSrcFolder) {
+    private void generateHtmlFiles(Class pojoClass, String templateSrcFolder) {
         try {
             generateListHtml(pojoClass, templateSrcFolder);
             generateAddHtml(pojoClass, templateSrcFolder);
@@ -376,7 +377,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
         generateFile(templateSrcFolder + fstLevelName + "/" + sndLevelName + (trdLevelName != null && !trdLevelName.isEmpty() ? "/" + trdLevelName : "") + "/list.html", src);
     }
 
-    private static void generateAddHtml(Class pojoClass, String templateSrcFolder) throws PojoException {
+    private void generateAddHtml(Class pojoClass, String templateSrcFolder) throws PojoException {
         StringBuffer src = new StringBuffer();
         Annotation pojoAnnotation = pojoClass.getAnnotation(Pojo.class);
         if (pojoAnnotation == null) {
@@ -512,7 +513,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
         generateFile(templateSrcFolder + fstLevelName + "/" + sndLevelName + (trdLevelName != null && !trdLevelName.isEmpty() ? "/" + trdLevelName : "") + "/add.html", src);
     }
 
-    private static void generateEditHtml(Class pojoClass, String templateSrcFolder) throws PojoException {
+    private void generateEditHtml(Class pojoClass, String templateSrcFolder) throws PojoException {
         StringBuffer src = new StringBuffer();
         String pojoId = "";
         Annotation pojoAnnotation = pojoClass.getAnnotation(Pojo.class);
@@ -749,7 +750,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
         generateFile(templateSrcFolder + fstLevelName + "/" + sndLevelName + (trdLevelName != null && !trdLevelName.isEmpty() ? "/" + trdLevelName : "") + "/audit.html", src);
     }
 
-    private static void generateJsFiles(Class pojoClass, String staticSrcFolder) {
+    private void generateJsFiles(Class pojoClass, String staticSrcFolder) {
         try {
             generateListJsFile(pojoClass, staticSrcFolder);
         } catch (PojoException e) {
@@ -757,7 +758,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
         }
     }
 
-    private static void generateListJsFile(Class pojoClass, String staticSrcFolder) throws PojoException {
+    private void generateListJsFile(Class pojoClass, String staticSrcFolder) throws PojoException {
         StringBuffer src = new StringBuffer();
         String pojo = pojoClass.getSimpleName();
         String pojoId = "";
@@ -1143,11 +1144,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println(getLevelNamesSrc("TestCorInfoComInfoBasicInfo"));
-    }
-
-    private static boolean isSysField(Field field) {
+    private boolean isSysField(Field field) {
         return sysFields.contains(field.getName());
     }
 
