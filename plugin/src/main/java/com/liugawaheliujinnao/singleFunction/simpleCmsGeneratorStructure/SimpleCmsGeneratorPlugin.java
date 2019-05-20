@@ -30,16 +30,10 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
     private MavenProject project;
 
     @Parameter
-    private String projectPacakge;
+    private String projectId;
 
     @Parameter
-    private String srcPath;
-
-    @Parameter
-    private String classesPath;
-
-    @Parameter
-    private String resorucePath;
+    private String projectMainFolder;
 
     @Parameter
     private List<String> sysFields;
@@ -53,9 +47,6 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
     // class类的集合
     private Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
 
-    @Parameter
-    private String classPath;
-
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private static String semicolon_ln = ";\r\n";
@@ -65,23 +56,27 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
     @Override
     public void execute() {
         System.out.println("CMS 自动生成 插件");
+        String projectAbsolutePath = project.getArtifact().getFile().getAbsolutePath() + "/";
+        String projectPath = projectId.replaceAll("\\.", "/") + "/";
+        String srcPath = projectAbsolutePath + projectPath;
+        String projectPojoClassPath = srcPath + "pojo";
         List<Class> generatorClasses = new ArrayList<>();
         URL[] urls = new URL[1];
         try {
-            urls[0] = new URL("file:" + classPath);
+            urls[0] = new URL("file:" + projectAbsolutePath);
         } catch (MalformedURLException e) {
             System.out.println("Url part is already wrong");
         }
         URLClassLoader urlClassLoader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
-        String projectDaoPackage = projectPacakge + ".dao";
-        String projectServicePackage = projectPacakge + ".service";
-        String projectServiceImplPackage = projectPacakge + ".service.impl";
-        String projectControllerPackage = projectPacakge + ".controller";
-        String serviceSrcFolder = srcPath + "service/";
-        String serviceImplSrcFolder = srcPath + "service/impl/";
-        String controllerSrcFolder = srcPath + "controller/";
-        String templateSrcFolder = resorucePath + "templates/";
-        String staticSrcFolder = resorucePath + "static/";
+        String projectDaoPackage = projectId + ".dao";
+        String projectServicePackage = projectId + ".service";
+        String projectServiceImplPackage = projectId + ".service.impl";
+        String projectControllerPackage = projectId + ".controller";
+        String serviceSrcFolder = projectMainFolder + "/java/" + projectPath + "service/";
+        String serviceImplSrcFolder = projectMainFolder + "/java/" + projectPath + "service/impl/";
+        String controllerSrcFolder = projectMainFolder + "/java/" + projectPath + "controller/";
+        String templateSrcFolder = projectMainFolder + "/resources/templates/";
+        String staticSrcFolder = projectMainFolder + "/resources/static/";
         StringBuffer logImportBuffer = new StringBuffer()
                 .append("import org.slf4j.Logger" + semicolon_ln)
                 .append("import org.slf4j.LoggerFactory" + semicolon_ln);
@@ -96,7 +91,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
                 .append("import org.springframework.web.bind.annotation.ResponseBody" + semicolon_ln);
         StringBuffer servletRequestImportBuffer = new StringBuffer()
                 .append("import javax.servlet.http.HttpServletRequest" + semicolon_ln);
-        String projectPojoClassPath = project.getArtifact().getFile().getAbsolutePath() + "/" + projectPacakge.replaceAll("\\.", "/") + "/pojo";
+
         String pojoFilePath;
         File file = new File(projectPojoClassPath);
         if (file.isDirectory()) {
@@ -106,7 +101,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
                 Integer startIndex = pojoFilePath.indexOf("/pojo") + 6;
                 String pojoName = pojoFilePath.substring(startIndex, pojoFilePath.lastIndexOf("."));
                 if (pojoFilePath.indexOf(".class") > 0 && pojoName.indexOf("Example") < 0 && pojoName.indexOf("$") < 0) {
-                    String pojoFullName = projectPacakge + ".pojo." + pojoName;
+                    String pojoFullName = projectId + ".pojo." + pojoName;
                     try {
                         Class pojoClass = urlClassLoader.loadClass(pojoFullName);
                         if (selectList == null || (selectList != null && selectList.contains(pojoName))) {
@@ -116,6 +111,7 @@ public class SimpleCmsGeneratorPlugin extends AbstractMojo {
                             generatorClasses.remove(pojoClass);
                         }
                     } catch (ClassNotFoundException e) {
+                        System.out.println("class not found exception happened");
                     }
                 }
             }
